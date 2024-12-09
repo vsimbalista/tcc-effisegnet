@@ -1,0 +1,37 @@
+# Configurações principais
+defaults:
+  - model: effiSegNetBN   # Aponta para o modelo a ser usado (o arquivo model/effiSegNetBN.yaml)
+  - optimizer: adamw      # Aponta para o otimizador AdamW (arquivo optimizer/adamw.yaml)
+  - scheduler: cosine     # Aponta para o scheduler CosineAnnealingLR (arquivo scheduler/cosine.yaml)
+  - _self_
+
+run_name: ${model.object.model_name}_${model.object.ch}  # Nome da execução, construído com base no nome do modelo e nos canais
+
+trainer:
+  _target_: lightning.pytorch.Trainer   # Definição do treinador usando PyTorch Lightning
+  accelerator: gpu                     # Seleção automática de CPU/GPU
+  max_epochs: 300                       # Número máximo de épocas para o treinamento
+  log_every_n_steps: 8                  # Frequência de logging
+  deterministic: warn                   # Definir comportamento determinístico com um aviso (para garantir reprodutibilidade)
+
+criterion:
+  _target_: monai.losses.DiceCELoss   # Função de perda combinada Dice + Cross-Entropy
+  include_background: False           # Ignorar o background na perda
+  sigmoid: True                       # Aplicar sigmoid à saída do modelo
+
+ch: 32                        # Número de canais (usado no modelo)
+pretrained: True              # Se os pesos pré-treinados devem ser carregados
+freeze_encoder: False         # Se o encoder será congelado
+deep_supervision: False       # Se a supervisão profunda está habilitada
+model_name: efficientnet-b0   # Nome do modelo de backbone (EfficientNet-B0)
+img_size: derived             # Tamanho da imagem
+batch_size: 8                 # Tamanho do batch para treinamento
+lr: 1e-4                      # Taxa de aprendizado
+
+# Configurações de sweep para testes com múltiplos modelos
+hydra:
+  sweeper:
+    params:
+      model_name: efficientnet-b0  # Parâmetro a ser variado no sweep
+      # Outros modelos podem ser testados variando o model_name aqui
+      # , efficientnet-b1, efficientnet-b2, efficientnet-b3, efficientnet-b4, efficientnet-b5, efficientnet-b6, efficientnet-b7

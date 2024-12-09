@@ -1,0 +1,9 @@
+# Configurações do modelo
+name: effiSegNetBN
+object:
+  _target_: models.effisegnet.EffiSegNetBN  # Define o caminho da classe do modelo a ser instanciado
+  ch: ${ch}                                 # Parâmetro de entrada para o número de canais, vinculado ao config.yaml
+  pretrained: ${pretrained}                 # Se o modelo deve ser carregado com pesos pré-treinados
+  freeze_encoder: ${freeze_encoder}         # Se as camadas do encoder devem ser congeladas (não treináveis)
+  deep_supervision: ${deep_supervision}     # Parâmetro para supervisão profunda
+  model_name: ${model_name}                 # Nome do modelo base (por exemplo, EfficientNet-B0)

@@ -1,0 +1,4 @@
+# Configurações do scheduler
+_target_: torch.optim.lr_scheduler.CosineAnnealingLR  # Define o agendador CosineAnnealingLR do PyTorch (agendador da taxa de aprendizado)
+T_max: ${trainer.max_epochs}                          # Número máximo de épocas, extraído da configuração do treinador
+eta_min: 0.00001                                      # Taxa de aprendizado mínima ao final do ciclo
