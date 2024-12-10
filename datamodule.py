@@ -1,10 +1,9 @@
 import os
-
 import albumentations as A #bib para augmentação de imagens
 import cv2
 import lightning as L #treinamento de modelos em pytorch
 from albumentations.pytorch import ToTensorV2 #converte img em tensor pytorch após augmentação
-from torch.utils.data import DataLoader, Dataset, random_split #lidar com datasets, carregar, dividir em train/val
+from torch.utils.data import DataLoader, Dataset #lidar com datasets, carregar, dividir em train/val
 
 class KvasirSEGDatagen(Dataset): # Generator em classe que herda da classe Dataset do Pytorch
     def __init__(self, pairs, transform=None):  # Inicialização da classe, com parametros
