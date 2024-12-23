@@ -125,11 +125,6 @@ class KvasirSEGDataset(L.LightningDataModule):
         # Initialize the dataset with testing transformations.
         self.dataset = KvasirSEGDatagen(all_pairs, transform=self.get_test_transforms())
     
-    # Novo método para acessar o len do dataset
-    def get_dataset_len(self):
-        """Retorna o tamanho do dataset, que é o número de pares de imagem e máscara."""
-        return len(self.dataset)
-    
     def set_splits(self, train_indices, val_indices, test_indices):
         """
         Sets the indices for training, validation, and testing splits.

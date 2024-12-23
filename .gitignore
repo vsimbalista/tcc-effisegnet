@@ -170,3 +170,5 @@ cython_debug/
 imgsHae/
 Kvasir-SEG/
 imagens_cancer_boca/
+outputs/
+logs/
