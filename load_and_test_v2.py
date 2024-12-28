@@ -13,47 +13,71 @@ import numpy as np
 from albumentations.pytorch import ToTensorV2
 from hydra.utils import instantiate
 from monai.networks.nets.efficientnet import get_efficientnet_image_size, EfficientNet    # MONAI: bib para imagens médicas: obtem tamanho da imagem adequada para EfficientNet
+import matplotlib.pyplot as plt
 
+from models.effisegnet import EffiSegNetBN
 
-# Initialize the model
-model = EfficientNet.from_name("efficientnet-b0")
+# # Initialize the model
+# model = EfficientNet.from_name("efficientnet-b0")
 
-# Load the checkpoint
-checkpoint = torch.load(model_path, map_location=torch.device('cpu'))  # Adjust path
-model.load_state_dict(checkpoint["state_dict"])
-model.eval()
+# # Load the checkpoint
+# checkpoint = torch.load(model_path, map_location=torch.device('cpu'))  # Adjust path
+# model.load_state_dict(checkpoint["state_dict"])
+# model.eval()
 
-# Placeholder paths (update these as needed)
+#%% Paths
 image_path = r"imagens_cancer_boca/images/FOP1182-18.jpg"
 model_path = r"logs/efficientnet-b0_32/version_9/checkpoints/epoch=299-step=14100-v9.ckpt"
 
-# Simulated configuration object
+#%% Simulated configuration object
 class CFG:
     img_size = "derived"
     model = {
         "object": {
+            "_target_": EffiSegNetBN, 
+            "ch": 32,                               
+            "pretrained": True,                       
+            "freeze_encoder": False,              
+            "deep_supervision": False,               
             "model_name": "efficientnet-b0"
         }
     }
 
-cfg = CFG()
+cfg = CFG()         
 
-# Get image size
+#%% Get image size
 if cfg.img_size == "derived":
-    img_size = get_efficientnet_image_size(cfg.model["object"]["model_name"])  
+    img_size = get_efficientnet_image_size(cfg.model['object']['model_name'])  
 else:
     img_size = cfg.img_size
 
 print(f"Image size: {img_size}")
 
-# Define Albumentations transformation
+#%% Define Albumentations transformation
 test_transforms = A.Compose([
     A.Resize(*(img_size, img_size), interpolation=cv2.INTER_LANCZOS4),
     A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), max_pixel_value=255),
     ToTensorV2()
 ])
 
-# Load the image
+base_transforms = A.Compose([
+    A.Resize(*(img_size, img_size), interpolation=cv2.INTER_LANCZOS4),
+    A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), max_pixel_value=255)
+])
+
+#%% Load model checkpoint
+# Assuming the model instantiation uses the 'instantiate' method (Hydra)
+model = instantiate(cfg.model['object'])
+checkpoint = torch.load(model_path)
+state_dict = {k.replace("model.", ""): v for k, v in checkpoint["state_dict"].items()}
+model.load_state_dict(state_dict)
+model.eval()
+print("Model loaded successfully.")
+
+#%% Select images
+image_path = r"imagens_cancer_boca/images/FOP1182-18.jpg"
+
+#%% Load the image
 image = cv2.imread(image_path)  # Read the image (BGR format)
 if image is None:
     raise FileNotFoundError(f"Image not found at {image_path}")
@@ -65,13 +89,7 @@ transformed = test_transforms(image=image)
 test_image = transformed['image'].unsqueeze(0)  # Add batch dimension
 print(f"Transformed image shape (for model input): {test_image.shape}")
 
-# Load model checkpoint
-# Assuming the model instantiation uses the 'instantiate' method (Hydra)
-model = instantiate(cfg.model["object"])
-checkpoint = torch.load(model_path)
-model.load_state_dict(checkpoint["state_dict"])
-model.eval()
-print("Model loaded successfully.")
+#%% Prediction
 
 # Perform inference
 with torch.no_grad():
@@ -89,3 +107,19 @@ os.makedirs("results/predictions", exist_ok=True)
 output_path = "results/predictions/predicted_mask.png"
 cv2.imwrite(output_path, predicted_mask)
 print(f"Prediction saved to {output_path}")
+
+#%% show
+
+img_resize = base_transforms(image=image)
+
+
+plt.subplot(1,3,1)
+plt.imshow(img_resize)
+# cv2.imshow("Image", transformed)
+plt.subplot(1,3,2)
+plt.imshow(output)
+# cv2.imshow("Output", output)
+plt.subplot(1,3,3)
+plt.imshow(predicted_mask)
+# cv2.imshow("Predicted_mask", predicted_mask)
+plt.show()

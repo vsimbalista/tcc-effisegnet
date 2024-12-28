@@ -50,7 +50,8 @@ def main(cfg):
     # Load model checkpoint
     model = instantiate(cfg.model.object)
     checkpoint = torch.load(model_path)
-    model.load_state_dict(checkpoint["state_dict"])
+    state_dict = {k.replace("model.", ""): v for k, v in checkpoint["state_dict"].items()}
+    model.load_state_dict(state_dict)
     model.eval()
 
     # Perform inference
@@ -95,5 +96,5 @@ if __name__ == "__main__":
 # To inspect the contents of the checkpoint file:
     
 # checkpoint = torch.load(model_path)
-# print(checkpoint.keys())  # View all keys in the checkpoint
+# print(checkpoint['state_dict'])  # View all keys in the checkpoint
 
