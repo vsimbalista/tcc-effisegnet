@@ -27,7 +27,7 @@ def main(cfg):                                                              # cf
         img_size = cfg.img_size     # Caso contrário, usa o tamanho especificado na configuração
 
     dataset = KvasirSEGDataset(batch_size=cfg.batch_size, img_size=img_size) # Instancia o DataSet definido em datamodule.py
-    dataset.setup() # Force setup to access dataset lenght
+    dataset.setup() # Force setup to access dataset length
     
     indices = list(range(len(dataset.dataset)))
 
@@ -45,7 +45,7 @@ def main(cfg):                                                              # cf
             random_state=42)
 
         # Update dataset with the current fold's train and validation indices
-        dataset.set_splits(train_indices, val_indices, test_indices) #test will be fixed
+        dataset.set_splits(train_indices, val_indices, test_indices) #test trasnform will be fixed
         
         # Instanciar modelo e dependências para cada fold
         model = instantiate(cfg.model.object)

@@ -16,6 +16,8 @@ results = results.rename(columns={'test_loss': "Loss", 'test_accuracy': "Accurac
                                   'test_recall': "Recall", 'test_precision': "Precision",
                                   'test_f1':"F1-score"})
 
+df = pd.melt(results, id_vars=["N fold"], var_name="Metric Name", value_name="Metric Value")
+
 #%% Violin Plot Example
 
 # df = px.data.tips()
@@ -25,8 +27,6 @@ results = results.rename(columns={'test_loss': "Loss", 'test_accuracy': "Accurac
 # fig.write_image("fig1.svg")
 
 #%% Violin Plot #1: All
-
-df = pd.melt(results, id_vars=["N fold"], var_name="Metric Name", value_name="Metric Value")
 
 fig = px.violin(df, y="Metric Value", x="Metric Name", color="Metric Name", box=True, points="all",
           hover_data=df.columns, title="Resultados Effisegnet K-fold k=10")
@@ -40,8 +40,19 @@ fig.write_image("results/fig1.png", width=1000, height=500)
 df = df[df["Metric Name"]!="Loss"]
 df = df[df["Metric Name"]!="F1-score"]
 fig = px.violin(df, y="Metric Value", x="Metric Name", color="Metric Name",
-                box=True, points="all", hover_data=df.columns,  title="Resultados Effisegnet K-fold k=10")
+                box=True, points="all", hover_data=df.columns, #title="Resultados Effisegnet K-fold k=10"
+)
+
+fig.update_layout(
+    showlegend=False,
+    yaxis_title=None,
+    xaxis_title=None,
+    font=dict(
+        family="Arial Black",
+        size=20
+    )
+)
 
 fig.show()
-fig.write_image("results/fig2.svg", width=1000, height=500)
-fig.write_image("results/fig2.png", width=1000, height=500)
+# fig.write_image("results/fig2.svg", width=1000, height=500)
+fig.write_image("results/fig2.png", width=1200, height=600)
