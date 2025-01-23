@@ -79,7 +79,34 @@ def get_random_image_names(folder_path, num_images=10):
     image_names = [os.path.splitext(f)[0] for f in selected_files]
     return image_names
 
-img_name_list = get_random_image_names(images_path, num_images=10)
+
+def get_specific_image_names(folder_path, test_indices):
+    # Lista todos os arquivos da pasta com extensões específicas
+    files = [f for f in os.listdir(folder_path) if f.endswith(('.png', '.jpg','.JPG','.jpeg'))]
+    
+    # Ordena a lista de arquivos para garantir consistência nos índices
+    files.sort()
+    
+    # Verifica se todos os índices fornecidos são válidos
+    if max(test_indices) >= len(files):
+        raise ValueError(
+            f"Um ou mais índices estão fora do intervalo. "
+            f"A pasta contém apenas {len(files)} imagens."
+        )
+    
+    # Seleciona os arquivos correspondentes aos índices fornecidos
+    selected_files = [files[i] for i in test_indices]
+    
+    # Remove as extensões dos nomes dos arquivos
+    image_names = [os.path.splitext(f)[0] for f in selected_files]
+    return image_names
+
+
+test_indices = [252, 149, 99, 257, 54, 413, 188, 411, 308, 71, 270,
+                130, 174, 102, 160, 343, 169, 359, 348, 20, 276]
+
+# img_name_list = get_random_image_names(images_path, num_images=10)
+img_name_list = get_specific_image_names(images_path, test_indices)
 print("Nomes das imagens selecionadas:", img_name_list)
 
 #%% Main Loop
@@ -135,28 +162,38 @@ for img_name in img_name_list:
     # Normalizar a saída inicial para o intervalo [0, 1] para visualização
     output_normalized = (output_np - output_np.min()) / (output_np.max() - output_np.min())
     
+    # Gerar recorte final
+    predicted_mask_normalized = predicted_mask / predicted_mask.max()
+    segmented_region = resized_image * predicted_mask_normalized[..., np.newaxis]
+    
     # Configurar a figura para exibir as imagens
-    fig, axes = plt.subplots(1, 4, figsize=(20, 5))
+    fig, axes = plt.subplots(1, 5, figsize=(20, 5))
     axes[0].imshow(resized_image)
-    axes[0].set_title("Imagem Original")
+    # axes[0].set_title("Imagem Original")
     axes[0].axis("off")
     
     axes[1].imshow(resized_mask, cmap="gray")
-    axes[1].set_title("Máscara Original")
+    # axes[1].set_title("Máscara Original")
     axes[1].axis("off")
     
     axes[2].imshow(output_normalized, cmap="gray")  # Usar um mapa de cores para contraste
-    axes[2].set_title("Saída Inicial")
+    # axes[2].set_title("Saída Inicial")
     axes[2].axis("off")
     
     axes[3].imshow(predicted_mask, cmap="gray")
-    axes[3].set_title("Máscara Predita")
+    # axes[3].set_title("Máscara Predita")
     axes[3].axis("off")
+
+    axes[4].imshow(segmented_region.astype('uint8'))
+    # axes[4].set_title("Região Segmentada")
+    axes[4].axis("off")
     
     # Exibir ou salvar a imagem composta
-    # plt.tight_layout()
+    plt.tight_layout()
     # plt.show()
     
     result_img_path = os.path.join(output_path,f"{img_name}.png")
-    plt.savefig(result_img_path, dpi=300)
+    plt.savefig(result_img_path, dpi=500)
     print(f"Prediction saved to {result_img_path}")
+    plt.close()
+    
