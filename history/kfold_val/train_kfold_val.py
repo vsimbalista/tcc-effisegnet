@@ -11,7 +11,7 @@ import json
 import numpy as np  # Para conversão de arrays em listas
 
 from datamodule_kfold import KvasirSEGDataset
-from network_module_kfold import Net
+from history_kfold_val.network_module_val import Net
 
 L.seed_everything(42, workers=True)             # Semente global para garantir resultados reprodutíveis
 torch.set_float32_matmul_precision("medium")    # Precisão de multiplicação de matrizes para melhor desempenho em GPUs
@@ -31,18 +31,18 @@ def main(cfg):                                                              # cf
     
     indices = list(range(len(dataset.dataset)))
 
-    # Step 1: Establish classic K-Fold k=10 ( 90% train | 10% val )
+    # Step 1: Perform K-Fold on the remaining 90% (train + val)
     kf = KFold(n_splits=10, shuffle=True, random_state=42)
     all_metrics = []
         
     for fold, (train_indices, val_test_indices) in enumerate(kf.split(indices)):
         print(f"Starting fold {fold + 1}...")
 
-        # # Step 2: Split val_test data in half (5% val + 5% test) vs 90% (train)
-        # val_indices, test_indices = train_test_split(
-        #     val_test_indices,
-        #     test_size=0.5,
-        #     random_state=42)
+        # Step 2: Split val_test data in half (5% val + 5% test) vs 90% (train)
+        val_indices, test_indices = train_test_split(
+            val_test_indices,
+            test_size=0.5,
+            random_state=42)
 
         # Update dataset with the current fold's train and validation indices
         dataset.set_splits(train_indices, val_indices, test_indices) #test trasnform will be fixed
@@ -57,7 +57,7 @@ def main(cfg):                                                              # cf
             scheduler=cfg.scheduler,                # Scheduler
         )
     
-        trainer = instantiate(cfg.trainer, logger=logger)   # Cira objeto trainer para gerenciar o ciclo de train
+        trainer = instantiate(cfg.trainer, logger=logger)   # Cira objeto trainer para gerenciar o ciclo de train / val
     
         # if efficientnetb5, b6, or b7, use binsearch to find the largest batch size
         if cfg.model.object.model_name in ["efficientnet-b5", "efficientnet-b6", "efficientnet-b7"]:    # Aplicando tuner para encontrar maior valor de lote adequado

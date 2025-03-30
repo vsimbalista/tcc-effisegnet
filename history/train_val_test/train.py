@@ -6,8 +6,8 @@ from lightning.pytorch import loggers
 from lightning.pytorch.tuner import Tuner   # Encontra automaticamente maior tamanho de lote, otimiza hiperparâmetros, pode monitorar métricas durante treinamento
 from monai.networks.nets.efficientnet import get_efficientnet_image_size    # MONAI: bib para imagens médicas: obtem tamanho da imagem adequada para EfficientNet
 
-from datamodule import KvasirSEGDataset
-from network_module import Net
+from history.train_val_test.datamodule import KvasirSEGDataset
+from history_kfold_val.network_module_val import Net
 
 L.seed_everything(42, workers=True)             # Semente global para garantir resultados reprodutíveis
 
