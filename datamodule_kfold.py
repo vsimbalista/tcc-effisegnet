@@ -74,31 +74,10 @@ class KvasirSEGDataset(L.LightningDataModule):
 
         # Indices for dataset splits.
         self.train_indices = None
-        self.val_indices = None
         self.test_indices = None
 
-    def get_train_transforms(self): #Não está sendo usado.
-        """Defines and returns data augmentation transformations for training."""
-        return A.Compose([
-            A.Resize(*(self.img_size, self.img_size), interpolation=cv2.INTER_LANCZOS4),
-            A.HorizontalFlip(p=0.5),
-            A.VerticalFlip(p=0.5),
-            A.ColorJitter(p=0.5, brightness=(0.6, 1.6), contrast=0.2, saturation=0.1, hue=0.01),
-            A.Affine(p=0.5, scale=(0.5, 1.5), translate_percent=0.125, rotate=90, interpolation=cv2.INTER_LANCZOS4),
-            A.ElasticTransform(p=0.5, interpolation=cv2.INTER_LANCZOS4),
-            A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), max_pixel_value=255),
-            ToTensorV2()
-        ])
 
-    def get_val_transforms(self): #Não está sendo usado.
-        """Defines and returns transformations for validation."""
-        return A.Compose([
-            A.Resize(*(self.img_size, self.img_size), interpolation=cv2.INTER_LANCZOS4),
-            A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), max_pixel_value=255),
-            ToTensorV2()
-        ])
-
-    def get_test_transforms(self): #Está sendo usado nos 3 conjuntos.
+    def get_transforms(self): #Está sendo usado nos 3 conjuntos.
         """Defines and returns transformations for testing."""
         return A.Compose([
             A.Resize(*(self.img_size, self.img_size), interpolation=cv2.INTER_LANCZOS4),
@@ -135,19 +114,12 @@ class KvasirSEGDataset(L.LightningDataModule):
             test_indices (list of int): Indices for testing samples.
         """
         self.train_indices = train_indices
-        self.val_indices = val_indices
         self.test_indices = test_indices
 
     def train_dataloader(self):
         """Creates the training DataLoader."""
         train_subset = Subset(self.dataset, self.train_indices)
         return DataLoader(train_subset, batch_size=self.batch_size, shuffle=True,
-                          num_workers=self.num_workers, persistent_workers=self.persistent_workers)
-
-    def val_dataloader(self):
-        """Creates the validation DataLoader."""
-        val_subset = Subset(self.dataset, self.val_indices)
-        return DataLoader(val_subset, batch_size=self.batch_size, shuffle=False,
                           num_workers=self.num_workers, persistent_workers=self.persistent_workers)
 
     def test_dataloader(self):

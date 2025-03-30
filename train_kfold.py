@@ -16,7 +16,6 @@ from network_module_kfold import Net
 L.seed_everything(42, workers=True)             # Semente global para garantir resultados reprodutíveis
 torch.set_float32_matmul_precision("medium")    # Precisão de multiplicação de matrizes para melhor desempenho em GPUs
 
-
 @hydra.main(config_path="config", config_name="config", version_base=None)  # Define a função principal do script, que serpa executada com a "config" fornecida
 def main(cfg):                                                              # cfg: objeto estruturado de forma hierarquica
     logger = loggers.TensorBoardLogger("logs/", name=str(cfg.run_name))     # Cria um logger do TensorBoard para monitorar o treinamento e registrar métricas
@@ -28,24 +27,17 @@ def main(cfg):                                                              # cf
 
     dataset = KvasirSEGDataset(batch_size=cfg.batch_size, img_size=img_size) # Instancia o DataSet definido em datamodule.py
     dataset.setup() # Force setup to access dataset length
-    
     indices = list(range(len(dataset.dataset)))
 
     # Step 1: Establish classic K-Fold k=10 ( 90% train | 10% val )
     kf = KFold(n_splits=10, shuffle=True, random_state=42)
     all_metrics = []
         
-    for fold, (train_indices, val_test_indices) in enumerate(kf.split(indices)):
+    for fold, (train_indices, test_indices) in enumerate(kf.split(indices)):
         print(f"Starting fold {fold + 1}...")
 
-        # # Step 2: Split val_test data in half (5% val + 5% test) vs 90% (train)
-        # val_indices, test_indices = train_test_split(
-        #     val_test_indices,
-        #     test_size=0.5,
-        #     random_state=42)
-
-        # Update dataset with the current fold's train and validation indices
-        dataset.set_splits(train_indices, val_indices, test_indices) #test trasnform will be fixed
+        # Update dataset with the current fold's train and test indices
+        dataset.set_splits(train_indices, test_indices)
         
         # Instanciar modelo e dependências para cada fold
         model = instantiate(cfg.model.object)
@@ -73,18 +65,13 @@ def main(cfg):                                                              # cf
             "test_metrics": test_metrics,
             "split": {
                 "n_train": len(train_indices),
-                "n_val": len(val_indices),
                 "n_test": len(test_indices)
             },
-            # "train_indices": train_indices,
-            "val_indices": val_indices,
             "test_indices": test_indices
         })
 
     # Converter ndarrays para listas antes de salvar no arquivo JSON
     for metrics in all_metrics:
-        # metrics["train_indices"] = np.array(metrics["train_indices"]).tolist()
-        metrics["val_indices"] = np.array(metrics["val_indices"]).tolist()
         metrics["test_indices"] = np.array(metrics["test_indices"]).tolist()
         metrics["test_metrics"] = [metric.tolist() if isinstance(metric, np.ndarray) else metric for metric in metrics["test_metrics"]]
 
@@ -93,7 +80,6 @@ def main(cfg):                                                              # cf
         json.dump(all_metrics, f, indent=4)
 
     print("Cross-validation completed! Results saved to cross_val_results.json")
-
 
 if __name__ == "__main__":  # Finaliza a definição e chama função principal quando script é executado diretamente
     main()
