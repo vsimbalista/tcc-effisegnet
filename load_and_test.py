@@ -21,8 +21,8 @@ from models.effisegnet import EffiSegNetBN
 #%% Paths
 images_path = "imagens_cancer_boca/images"
 masks_path = "imagens_cancer_boca/masks"
-model_path = "logs/efficientnet-b0_32/version_9/checkpoints/epoch=299-step=14100-v9.ckpt"
-output_path = "results/predictions"
+model_path = "logs/efficientnet-b0_32/version_13/checkpoints/epoch=49-step=2350-v9.ckpt"
+output_path = "results/predictions/v3"
 
 #%% Simulated configuration object
 class CFG:
@@ -79,9 +79,10 @@ def get_random_image_names(folder_path, num_images=10):
     image_names = [os.path.splitext(f)[0] for f in selected_files]
     return image_names
 
-
-test_indices = [252, 149, 99, 257, 54, 413, 188, 411, 308, 71, 270,
-                130, 174, 102, 160, 343, 169, 359, 348, 20, 276]
+test_indices = [
+        20, 21, 48, 50, 54, 58, 71, 87, 99, 102, 106, 121, 130, 149, 151, 160, 169, 174, 187, 188, 189,
+        191, 214, 235, 252, 257, 270, 276, 293, 308, 313, 330, 343, 344, 348, 359, 363, 372, 385, 411, 413
+    ]
 
 def get_specific_image_names(folder_path, test_indices):
     # Lista todos os arquivos da pasta com extensões específicas
@@ -161,8 +162,18 @@ for img_name in img_name_list:
     # Normalizar a saída inicial para o intervalo [0, 1] para visualização
     output_normalized = (output_np - output_np.min()) / (output_np.max() - output_np.min())
     
+    # Normalizar a máscara predita para o intervalo [0, 1] se necessário
+    predicted_mask_normalized = predicted_mask / predicted_mask.max()
+
+    # Expandir a dimensão da máscara para corresponder aos 3 canais da imagem
+    predicted_mask_3c = predicted_mask_normalized[..., np.newaxis]
+
+    # Aplicar a máscara à imagem preservando as cores originais
+    segmented_region = resized_image * predicted_mask_3c
+
+
     # Configurar a figura para exibir as imagens
-    fig, axes = plt.subplots(1, 4, figsize=(20, 5))
+    fig, axes = plt.subplots(1, 5, figsize=(20, 5))
     axes[0].imshow(resized_image)
     # axes[0].set_title("Imagem Original")
     axes[0].axis("off")
@@ -178,6 +189,10 @@ for img_name in img_name_list:
     axes[3].imshow(predicted_mask, cmap="gray")
     # axes[3].set_title("Máscara Predita")
     axes[3].axis("off")
+
+    axes[4].imshow(segmented_region.astype("uint8"), cmap="gray")
+    # axes[4].set_title("Exemplo visual")
+    axes[4].axis("off")
     
     # Exibir ou salvar a imagem composta
     plt.tight_layout()
