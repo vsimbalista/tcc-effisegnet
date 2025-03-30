@@ -10,7 +10,7 @@ run_name: ${model.object.model_name}_${model.object.ch}  # Nome da execução, c
 trainer:
   _target_: lightning.pytorch.Trainer   # Definição do treinador usando PyTorch Lightning
   accelerator: gpu                     # Seleção automática de CPU/GPU
-  max_epochs: 300                       # Número máximo de épocas para o treinamento
+  max_epochs: 50                       # Número máximo de épocas para o treinamento
   log_every_n_steps: 8               # Frequência de logging
   deterministic: warn                   # Definir comportamento determinístico com um aviso (para garantir reprodutibilidade)
 

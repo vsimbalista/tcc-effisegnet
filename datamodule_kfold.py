@@ -102,9 +102,9 @@ class KvasirSEGDataset(L.LightningDataModule):
         all_pairs = list(zip(images, masks))
         
         # Initialize the dataset with testing transformations.
-        self.dataset = KvasirSEGDatagen(all_pairs, transform=self.get_test_transforms())
+        self.dataset = KvasirSEGDatagen(all_pairs, transform=self.get_transforms())
     
-    def set_splits(self, train_indices, val_indices, test_indices):
+    def set_splits(self, train_indices, test_indices):
         """
         Sets the indices for training, validation, and testing splits.
         
