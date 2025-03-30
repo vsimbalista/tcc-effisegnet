@@ -11,17 +11,14 @@ results_path = "results/Effisegnet results.xlsx"
 
 results = pd.read_excel(results_path)
 
-results = results.rename(columns={'test_loss': "Loss", 'test_accuracy': "Accuracy",
-                                  'test_dice': "Dice_ERRADO", 'test_iou': "IoU",
-                                  'test_recall': "Recall", 'test_precision': "Precision",
-                                  'test_f1':"Dice"})
+results = results.rename(columns={'test_loss': "Loss", 'test_accuracy': "Accuracy", 'test_iou': "IoU",
+                                  'test_recall': "Recall", 'test_precision': "Precision", 'test_f1':"Dice"})
 
 df = pd.melt(results, id_vars=["N fold"], var_name="Metric Name", value_name="Metric Value")
  
-#%% Violin Plot #2: Not Loss
+#%% Violin Plot: Metrics
 
 df = df[df["Metric Name"]!="Loss"]
-df = df[df["Metric Name"]!="Dice_ERRADO"]
 fig = px.violin(df, y="Metric Value", x="Metric Name", color="Metric Name",
                 box=True, points="all", hover_data=df.columns, #title="Resultados Effisegnet K-fold k=10"
 )
@@ -37,5 +34,5 @@ fig.update_layout(
 )
 
 fig.show()
-fig.write_image("results/fig3.svg", width=1000, height=500)
-fig.write_image("results/fig3.png", width=1200, height=600)
+fig.write_image("results/fig4.svg", width=1000, height=500)
+fig.write_image("results/fig4.png", width=1200, height=600)
