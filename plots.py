@@ -9,7 +9,7 @@ import plotly.express as px
 
 results_path = "results/Effisegnet results.xlsx"
 
-results = pd.read_excel(results_path)
+results = pd.read_excel(results_path, sheet_name="v3")
 
 results = results.rename(columns={'test_loss': "Loss", 'test_accuracy': "Accuracy", 'test_iou': "IoU",
                                   'test_recall': "Recall", 'test_precision': "Precision", 'test_f1':"Dice"})
@@ -34,5 +34,5 @@ fig.update_layout(
 )
 
 fig.show()
-fig.write_image("results/fig4.svg", width=1000, height=500)
-fig.write_image("results/fig4.png", width=1200, height=600)
+fig.write_image("results/fig5.svg", width=1000, height=500)
+fig.write_image("results/fig5.png", width=1200, height=600)

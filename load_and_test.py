@@ -21,7 +21,7 @@ from models.effisegnet import EffiSegNetBN
 #%% Paths
 images_path = "imagens_cancer_boca/images"
 masks_path = "imagens_cancer_boca/masks"
-model_path = "logs/efficientnet-b0_32/version_13/checkpoints/epoch=49-step=2350-v9.ckpt"
+model_path = "logs/efficientnet-b0_32/version_14/checkpoints/epoch=99-step=4700-v9.ckpt"
 output_path = "results/predictions/v3"
 
 #%% Simulated configuration object
@@ -80,8 +80,8 @@ def get_random_image_names(folder_path, num_images=10):
     return image_names
 
 test_indices = [
-        20, 21, 48, 50, 54, 58, 71, 87, 99, 102, 106, 121, 130, 149, 151, 160, 169, 174, 187, 188, 189,
-        191, 214, 235, 252, 257, 270, 276, 293, 308, 313, 330, 343, 344, 348, 359, 363, 372, 385, 411, 413
+        20, 21, 48, 50, 54, 58, 71, 87, 99, 102, 106, 121, 130, 149, 151, 160, 169, 174, 187, 188, 189, 191,
+        214, 235, 252, 257, 270, 276, 293, 308, 313, 330, 343, 344, 348, 359, 363, 372, 385, 411, 413
     ]
 
 def get_specific_image_names(folder_path, test_indices):
